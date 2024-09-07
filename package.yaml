@@ -1,0 +1,12 @@
+name: compdata
+version: 0.13.1
+synopsis: Compositional Data Types
+category: Generics
+license: BSD3
+license-file: LICENSE
+author: Patrick Bahr, Tom Hvitved
+dependencies: 
+  - base >= 4.16 && < 4.20
+library:
+  source-dirs: src
+  ghc-options: -W
