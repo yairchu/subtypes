@@ -6,6 +6,7 @@
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
 {-# LANGUAGE UndecidableInstances   #-}
+{-# LANGUAGE TypeApplications       #-}
 
 --------------------------------------------------------------------------------
 -- |
@@ -47,25 +48,25 @@ instance Subsume (Found Here) f f where
     prj' _ = Just
 
 instance Subsume (Found p) f g => Subsume (Found (Le p)) f (g :+: g') where
-    inj' _ = L1 . inj' (Proxy :: Proxy (Found p))
+    inj' _ = L1 . inj' (Proxy @(Found p))
 
-    prj' _ (L1 x) = prj' (Proxy :: Proxy (Found p)) x
+    prj' _ (L1 x) = prj' (Proxy @(Found p)) x
     prj' _ _       = Nothing
 
 instance Subsume (Found p) f g => Subsume (Found (Ri p)) f (g' :+: g) where
-    inj' _ = R1 . inj' (Proxy :: Proxy (Found p))
+    inj' _ = R1 . inj' (Proxy @(Found p))
 
-    prj' _ (R1 x) = prj' (Proxy :: Proxy (Found p)) x
+    prj' _ (R1 x) = prj' (Proxy @(Found p)) x
     prj' _ _       = Nothing
 
 instance (Subsume (Found p1) f1 g, Subsume (Found p2) f2 g)
     => Subsume (Found (Sum p1 p2)) (f1 :+: f2) g where
-    inj' _ (L1 x) = inj' (Proxy :: Proxy (Found p1)) x
-    inj' _ (R1 x) = inj' (Proxy :: Proxy (Found p2)) x
+    inj' _ (L1 x) = inj' (Proxy @(Found p1)) x
+    inj' _ (R1 x) = inj' (Proxy @(Found p2)) x
 
-    prj' _ x = case prj' (Proxy :: Proxy (Found p1)) x of
+    prj' _ x = case prj' (Proxy @(Found p1)) x of
                  Just y -> Just (L1 y)
-                 _      -> case prj' (Proxy :: Proxy (Found p2)) x of
+                 _      -> case prj' (Proxy @(Found p2)) x of
                              Just y -> Just (R1 y)
                              _      -> Nothing
 
@@ -76,7 +77,7 @@ instance (Subsume (Found p1) f1 g, Subsume (Found p2) f2 g)
 type f :<: g = (Subsume (ComprEmb (Elem f g)) f g)
 
 inj :: forall f g a . (f :<: g) => f a -> g a
-inj = inj' (Proxy :: Proxy (ComprEmb (Elem f g)))
+inj = inj' (Proxy @(ComprEmb (Elem f g)))
 
 proj :: forall f g a . (f :<: g) => g a -> Maybe (f a)
-proj = prj' (Proxy :: Proxy (ComprEmb (Elem f g)))
+proj = prj' (Proxy @(ComprEmb (Elem f g)))
