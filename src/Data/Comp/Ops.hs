@@ -1,12 +1,4 @@
-{-# LANGUAGE ConstraintKinds        #-}
-{-# LANGUAGE DataKinds              #-}
-{-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
-{-# LANGUAGE ScopedTypeVariables    #-}
-{-# LANGUAGE TypeFamilies           #-}
-{-# LANGUAGE TypeOperators          #-}
-{-# LANGUAGE UndecidableInstances   #-}
-{-# LANGUAGE TypeApplications       #-}
+{-# LANGUAGE GHC2021, DataKinds, TypeFamilies, UndecidableInstances #-}
 
 --------------------------------------------------------------------------------
 -- |

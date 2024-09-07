@@ -1,7 +1,4 @@
-{-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE TypeFamilies         #-}
-{-# LANGUAGE TypeOperators        #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE GHC2021, DataKinds, TypeFamilies, UndecidableInstances #-}
 
 --------------------------------------------------------------------------------
 -- |

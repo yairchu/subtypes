@@ -118,6 +118,5 @@ library
                         tree-view        >= 0.5.1  && < 0.6
 
   Default-Language:     Haskell2010
-  Default-Extensions:   FlexibleContexts
   hs-source-dirs:	src
   ghc-options:          -W
