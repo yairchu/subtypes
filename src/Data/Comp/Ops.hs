@@ -24,39 +24,10 @@ module Data.Comp.Ops where
 
 import Data.Kind
 import Data.Proxy
+import GHC.Generics
 
 import Data.Comp.SubsumeCommon
 
-infixr 6 :+:
-
-
--- |Formal sum of signatures (functors).
-data (f :+: g) e = Inl (f e)
-                 | Inr (g e)
-
-instance (Functor f, Functor g) => Functor (f :+: g) where
-    fmap f (Inl e) = Inl (fmap f e)
-    fmap f (Inr e) = Inr (fmap f e)
-
-instance (Foldable f, Foldable g) => Foldable (f :+: g) where
-    fold (Inl e) = fold e
-    fold (Inr e) = fold e
-    foldMap f (Inl e) = foldMap f e
-    foldMap f (Inr e) = foldMap f e
-    foldr f b (Inl e) = foldr f b e
-    foldr f b (Inr e) = foldr f b e
-    foldl f b (Inl e) = foldl f b e
-    foldl f b (Inr e) = foldl f b e
-    foldr1 f (Inl e) = foldr1 f e
-    foldr1 f (Inr e) = foldr1 f e
-    foldl1 f (Inl e) = foldl1 f e
-    foldl1 f (Inr e) = foldl1 f e
-
-instance (Traversable f, Traversable g) => Traversable (f :+: g) where
-    traverse f (Inl e) = Inl <$> traverse f e
-    traverse f (Inr e) = Inr <$> traverse f e
-    sequenceA (Inl e) = Inl <$> sequenceA e
-    sequenceA (Inr e) = Inr <$> sequenceA e
 
 infixl 5 :<:
 
@@ -76,26 +47,26 @@ instance Subsume (Found Here) f f where
     prj' _ = Just
 
 instance Subsume (Found p) f g => Subsume (Found (Le p)) f (g :+: g') where
-    inj' _ = Inl . inj' (Proxy :: Proxy (Found p))
+    inj' _ = L1 . inj' (Proxy :: Proxy (Found p))
 
-    prj' _ (Inl x) = prj' (Proxy :: Proxy (Found p)) x
+    prj' _ (L1 x) = prj' (Proxy :: Proxy (Found p)) x
     prj' _ _       = Nothing
 
 instance Subsume (Found p) f g => Subsume (Found (Ri p)) f (g' :+: g) where
-    inj' _ = Inr . inj' (Proxy :: Proxy (Found p))
+    inj' _ = R1 . inj' (Proxy :: Proxy (Found p))
 
-    prj' _ (Inr x) = prj' (Proxy :: Proxy (Found p)) x
+    prj' _ (R1 x) = prj' (Proxy :: Proxy (Found p)) x
     prj' _ _       = Nothing
 
 instance (Subsume (Found p1) f1 g, Subsume (Found p2) f2 g)
     => Subsume (Found (Sum p1 p2)) (f1 :+: f2) g where
-    inj' _ (Inl x) = inj' (Proxy :: Proxy (Found p1)) x
-    inj' _ (Inr x) = inj' (Proxy :: Proxy (Found p2)) x
+    inj' _ (L1 x) = inj' (Proxy :: Proxy (Found p1)) x
+    inj' _ (R1 x) = inj' (Proxy :: Proxy (Found p2)) x
 
     prj' _ x = case prj' (Proxy :: Proxy (Found p1)) x of
-                 Just y -> Just (Inl y)
+                 Just y -> Just (L1 y)
                  _      -> case prj' (Proxy :: Proxy (Found p2)) x of
-                             Just y -> Just (Inr y)
+                             Just y -> Just (R1 y)
                              _      -> Nothing
 
 
