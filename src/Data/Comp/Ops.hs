@@ -4,12 +4,10 @@
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs                  #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE PolyKinds              #-}
 {-# LANGUAGE ScopedTypeVariables    #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
-{-# LANGUAGE TypeSynonymInstances   #-}
 {-# LANGUAGE UndecidableInstances   #-}
 
 --------------------------------------------------------------------------------
@@ -85,10 +83,6 @@ instance (Traversable f, Traversable g) => Traversable (f :+: g) where
     traverse f (Inr e) = Inr <$> traverse f e
     sequenceA (Inl e) = Inl <$> sequenceA e
     sequenceA (Inr e) = Inr <$> sequenceA e
-    mapM f (Inl e) = Inl `liftM` mapM f e
-    mapM f (Inr e) = Inr `liftM` mapM f e
-    sequence (Inl e) = Inl `liftM` sequence e
-    sequence (Inr e) = Inr `liftM` sequence e
 
 infixl 5 :<:
 infixl 5 :=:
@@ -169,7 +163,7 @@ fsnd :: (f :*: g) a -> g a
 fsnd (_ :*: x) = x
 
 instance (Functor f, Functor g) => Functor (f :*: g) where
-    fmap h (f :*: g) = (fmap h f :*: fmap h g)
+    fmap h (f :*: g) = fmap h f :*: fmap h g
 
 
 instance (Foldable f, Foldable g) => Foldable (f :*: g) where
@@ -179,9 +173,7 @@ instance (Foldable f, Foldable g) => Foldable (f :*: g) where
 
 instance (Traversable f, Traversable g) => Traversable (f :*: g) where
     traverse f (x :*: y) = liftA2 (:*:) (traverse f x) (traverse f y)
-    sequenceA (x :*: y) = liftA2 (:*:)(sequenceA x) (sequenceA y)
-    mapM f (x :*: y) = liftM2 (:*:) (mapM f x) (mapM f y)
-    sequence (x :*: y) = liftM2 (:*:) (sequence x) (sequence y)
+    sequenceA (x :*: y) = liftA2 (:*:) (sequenceA x) (sequenceA y)
 
 -- Constant Products
 
@@ -203,10 +195,8 @@ instance (Foldable f) => Foldable (f :&: a) where
     foldl1 f (v :&: _) = foldl1 f v
 
 instance (Traversable f) => Traversable (f :&: a) where
-    traverse f (v :&: c) = liftA (:&: c) (traverse f v)
-    sequenceA (v :&: c) = liftA (:&: c)(sequenceA v)
-    mapM f (v :&: c) = liftM (:&: c) (mapM f v)
-    sequence (v :&: c) = liftM (:&: c) (sequence v)
+    traverse f (v :&: c) = fmap (:&: c) (traverse f v)
+    sequenceA (v :&: c) = fmap (:&: c) (sequenceA v)
 
 {-| This class defines how to distribute an annotation over a sum of
 signatures. -}
