@@ -10,3 +10,9 @@ dependencies:
 library:
   source-dirs: src
   ghc-options: -W
+tests:
+  test:
+    main: Spec.hs
+    source-dirs: test
+    dependencies:
+    - compdata
