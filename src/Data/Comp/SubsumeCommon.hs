@@ -38,7 +38,7 @@ data Pos = Here | Le Pos | Ri Pos | Sum Pos Pos
 data Emb = Found Pos | NotFound | Ambiguous
 
 
-type family Choose (e1 :: Emb) (r :: Emb) :: Emb where
+type family Choose e1 r where
     Choose (Found x) (Found y) = Ambiguous
     Choose Ambiguous y = Ambiguous
     Choose x Ambiguous = Ambiguous
@@ -47,7 +47,7 @@ type family Choose (e1 :: Emb) (r :: Emb) :: Emb where
     Choose x y = NotFound
 
 
-type family Sum' (e1 :: Emb) (r :: Emb) :: Emb where
+type family Sum' e1 r where
     Sum' (Found x) (Found y) = Found (Sum x y)
     Sum' Ambiguous y = Ambiguous
     Sum' x Ambiguous = Ambiguous
@@ -73,7 +73,7 @@ type family Sum' (e1 :: Emb) (r :: Emb) :: Emb where
 -- term of a subsumption, and thus yields more efficient
 -- implementations of 'inj' and 'prj'.
 
-type family ComprPos (p :: Pos) :: Pos where
+type family ComprPos p where
     ComprPos Here = Here
     ComprPos (Le p) = Le (ComprPos p)
     ComprPos (Ri p) = Ri (ComprPos p)
@@ -89,25 +89,25 @@ type family CombineRec l r where
     CombineRec l r = CombineMaybe (Sum l r) (Combine l r)
 
 -- | Helper type family for 'ComprPos'.
-type family CombineMaybe (p :: Pos) (p' :: Maybe Pos) where
-    CombineMaybe p (Just p') = p'
-    CombineMaybe p p'        = p
+type family CombineMaybe p p' :: Pos where
+    CombineMaybe _ (Just p) = p
+    CombineMaybe p _ = p
 
 
 -- | Helper type family for 'ComprPos'.
-type family Combine (l :: Pos) (r :: Pos) :: Maybe Pos where
+type family Combine l r where
     Combine (Le l) (Le r) = Le' (Combine l r)
     Combine (Ri l) (Ri r) = Ri' (Combine l r)
     Combine (Le Here) (Ri Here) = Just Here
     Combine l r = Nothing
 
 -- | 'Ri' lifted to 'Maybe'.
-type family Ri' (p :: Maybe Pos) :: Maybe Pos where
+type family Ri' p where
     Ri' Nothing = Nothing
     Ri' (Just p) = Just (Ri p)
 
 -- | 'Le' lifted to 'Maybe'.
-type family Le' (p :: Maybe Pos) :: Maybe Pos where
+type family Le' p where
     Le' Nothing = Nothing
     Le' (Just p) = Just (Le p)
 
@@ -123,22 +123,22 @@ type family Le' (p :: Maybe Pos) :: Maybe Pos where
 -- underneath a 'Le' or 'Ri' (i.e. only at the root or underneath a
 -- 'Sum'). We will refer to such positions below as /atomic position/.
 -- Positions not containing 'Sum' are called /simple positions/.
-type family ComprEmb (e :: Emb) :: Emb where
+type family ComprEmb e where
     ComprEmb (Found p) = Check (Dupl p) (ComprPos p)
     ComprEmb e = e
 
 -- | Helper type family for 'ComprEmb'.
-type family Check (b :: Bool) (p :: Pos) where
+type family Check b p where
     Check False p = Found p
-    Check True  p = Ambiguous
+    Check True _ = Ambiguous
 
 -- | This type family turns a list of /atomic position/ into a list of
 -- /simple positions/ by recursively splitting each position of the
 -- form @Sum p1 p2@ into @p1@ and @p2@.
-type family ToList (s :: [Pos]) :: [Pos] where
+type family ToList s where
+    ToList '[] = '[]
     ToList (Sum p1 p2 ': s) = ToList (p1 ': p2 ': s)
     ToList (p ': s) = p ': ToList s
-    ToList '[] = '[]
 
 -- | This type checks whether the argument (atomic) position has
 -- duplicates.
@@ -146,19 +146,19 @@ type Dupl s = Dupl' (ToList '[s])
 
 -- | This type family checks whether the list of positions given as an
 -- argument contains any duplicates.
-type family Dupl' (s :: [Pos]) :: Bool where
-    Dupl' (p ': r) = OrDupl' (Find p r) r
+type family Dupl' s where
     Dupl' '[] = False
+    Dupl' (p ': r) = OrDupl' (Find p r) r
 
 -- | This type family checks whether its first argument is contained
 -- its second argument.
-type family Find (p :: Pos) (s :: [Pos]) :: Bool where
-    Find p (p ': r)  = True
-    Find p (p' ': r) = Find p r
+type family Find (p :: Pos) s where
     Find p '[] = False
+    Find p (p ': _)  = True
+    Find p (p' ': r) = Find p r
 
 -- | This type family returns @True@ if the first argument is true;
 -- otherwise it checks the second argument for duplicates.
-type family OrDupl' (a :: Bool) (b :: [Pos]) :: Bool where
-    OrDupl'  True  c  = True
-    OrDupl'  False c  = Dupl' c
+type family OrDupl' a b where
+    OrDupl' True _ = True
+    OrDupl' False c = Dupl' c
