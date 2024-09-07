@@ -25,6 +25,8 @@ infixl 5 :<:
 
 type family Elem f g where
     Elem f f = Found Here
+    Elem f (M1 _ _ g) = Seq' Wrapped (Elem f g)
+    Elem (M1 _ _ f) g = Seq' Unwrapped (Elem f g)
     Elem (f1 :+: f2) g = Sum' (Elem f1 g) (Elem f2 g)
     Elem f (g1 :+: g2) = Choose (Elem f g1) (Elem f g2)
     Elem f g = NotFound
@@ -63,7 +65,15 @@ instance (Subsume (Found p1) f1 g, Subsume (Found p2) f2 g) =>
             Just y -> Just (R1 y)
             _ -> Nothing
 
+instance (Subsume (Found p) f g) => Subsume (Found (Wrapped p)) f (M1 i c g) where
+    inj' _ = M1 . inj' (Proxy @(Found p))
 
+    prj' _ (M1 x) = prj' (Proxy @(Found p)) x
+
+instance (Subsume (Found p) f g) => Subsume (Found (Unwrapped p)) (M1 i c f) g where
+    inj' _ (M1 x) = inj' (Proxy @(Found p)) x
+
+    prj' _ = fmap M1 . prj' (Proxy @(Found p))
 
 -- | A constraint @f :<: g@ expresses that the signature @f@ is
 -- subsumed by @g@, i.e. @f@ can be used to construct elements in @g@.

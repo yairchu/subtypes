@@ -19,13 +19,15 @@ module Data.Comp.SubsumeCommon
     , Pos (..)
     , Emb (..)
     , Choose
-    , Sum'
+    , Sum', Seq'
     ) where
 
 -- | This type is used in its promoted form only. It represents
 -- pointers from the left-hand side of a subsumption to the right-hand
 -- side.
-data Pos = Here | Le Pos | Ri Pos | Sum Pos Pos
+--
+-- TODO: Is Wrapped really necessary?
+data Pos = Here | Le Pos | Ri Pos | Sum Pos Pos | Wrapped Pos | Unwrapped Pos
 
 -- | This type is used in its promoted form only. It represents
 -- possible results for checking for subsumptions. 'Found' indicates a
@@ -52,6 +54,11 @@ type family Sum' e1 r where
     Sum' x NotFound = NotFound
 
 
+type family Seq' f e where
+    Seq' f (Found x) = Found (f x)
+    Seq' _ Ambiguous = Ambiguous
+    Seq' _ NotFound = NotFound
+
 -- | This type family takes a position type and compresses it. That
 -- means it replaces each nested occurrence of
 --
@@ -75,6 +82,8 @@ type family ComprPos p where
     ComprPos (Le p) = Le (ComprPos p)
     ComprPos (Ri p) = Ri (ComprPos p)
     ComprPos (Sum l r) = CombineRec (ComprPos l) (ComprPos r)
+    ComprPos (Wrapped p) = Wrapped (ComprPos p)
+    ComprPos (Unwrapped p) = Unwrapped (ComprPos p)
 
 
 -- | Helper type family for 'ComprPos'. Note that we could have
@@ -95,7 +104,7 @@ type family CombineMaybe p p' :: Pos where
 type family Combine l r where
     Combine (Le l) (Le r) = Le' (Combine l r)
     Combine (Ri l) (Ri r) = Ri' (Combine l r)
-    Combine (Le Here) (Ri Here) = Just Here
+    Combine (Le a) (Ri a) = Just a
     Combine l r = Nothing
 
 -- | 'Ri' lifted to 'Maybe'.
