@@ -1,2 +1,0 @@
-#!/bin/sh
-cabal bench --benchmark-option=--summary=benchmark-results/results.csv
