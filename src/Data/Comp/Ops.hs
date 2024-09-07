@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds        #-}
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables    #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
@@ -22,13 +22,10 @@
 
 module Data.Comp.Ops where
 
-import Data.Foldable
 import Data.Kind
 import Data.Proxy
 
 import Data.Comp.SubsumeCommon
-
--- Sums
 
 infixr 6 :+:
 
@@ -36,20 +33,6 @@ infixr 6 :+:
 -- |Formal sum of signatures (functors).
 data (f :+: g) e = Inl (f e)
                  | Inr (g e)
-
-fromInl :: (f :+: g) e -> Maybe (f e)
-fromInl = caseF Just (const Nothing)
-
-fromInr :: (f :+: g) e -> Maybe (g e)
-fromInr = caseF (const Nothing) Just
-
-{-| Utility function to case on a functor sum, without exposing the internal
-  representation of sums. -}
-caseF :: (f a -> b) -> (g a -> b) -> (f :+: g) a -> b
-{-# INLINE caseF #-}
-caseF f g x = case x of
-                Inl x -> f x
-                Inr x -> g x
 
 instance (Functor f, Functor g) => Functor (f :+: g) where
     fmap f (Inl e) = Inl (fmap f e)
@@ -76,7 +59,6 @@ instance (Traversable f, Traversable g) => Traversable (f :+: g) where
     sequenceA (Inr e) = Inr <$> sequenceA e
 
 infixl 5 :<:
-infixl 5 :=:
 
 type family Elem (f :: Type -> Type) (g :: Type -> Type) :: Emb where
     Elem f f = Found Here
@@ -127,103 +109,3 @@ inj = inj' (Proxy :: Proxy (ComprEmb (Elem f g)))
 
 proj :: forall f g a . (f :<: g) => g a -> Maybe (f a)
 proj = prj' (Proxy :: Proxy (ComprEmb (Elem f g)))
-
-type f :=: g = (f :<: g, g :<: f)
-
-
-
-spl :: (f :=: f1 :+: f2) => (f1 a -> b) -> (f2 a -> b) -> f a -> b
-spl f1 f2 x = case inj x of
-            Inl y -> f1 y
-            Inr y -> f2 y
-
-
-
--- Products
-
-infixr 8 :*:
-
--- |Formal product of signatures (functors).
-data (f :*: g) a = f a :*: g a
-
-
-ffst :: (f :*: g) a -> f a
-ffst (x :*: _) = x
-
-fsnd :: (f :*: g) a -> g a
-fsnd (_ :*: x) = x
-
-instance (Functor f, Functor g) => Functor (f :*: g) where
-    fmap h (f :*: g) = fmap h f :*: fmap h g
-
-
-instance (Foldable f, Foldable g) => Foldable (f :*: g) where
-    foldr f e (x :*: y) = foldr f (foldr f e y) x
-    foldl f e (x :*: y) = foldl f (foldl f e x) y
-
-
-instance (Traversable f, Traversable g) => Traversable (f :*: g) where
-    traverse f (x :*: y) = liftA2 (:*:) (traverse f x) (traverse f y)
-    sequenceA (x :*: y) = liftA2 (:*:) (sequenceA x) (sequenceA y)
-
--- Constant Products
-
-infixr 7 :&:
-
-{-| This data type adds a constant product (annotation) to a signature. -}
-data (f :&: a) e = f e :&: a
-
-
-instance (Functor f) => Functor (f :&: a) where
-    fmap f (v :&: c) = fmap f v :&: c
-
-instance (Foldable f) => Foldable (f :&: a) where
-    fold (v :&: _) = fold v
-    foldMap f (v :&: _) = foldMap f v
-    foldr f e (v :&: _) = foldr f e v
-    foldl f e (v :&: _) = foldl f e v
-    foldr1 f (v :&: _) = foldr1 f v
-    foldl1 f (v :&: _) = foldl1 f v
-
-instance (Traversable f) => Traversable (f :&: a) where
-    traverse f (v :&: c) = fmap (:&: c) (traverse f v)
-    sequenceA (v :&: c) = fmap (:&: c) (sequenceA v)
-
-{-| This class defines how to distribute an annotation over a sum of
-signatures. -}
-class DistAnn s p s' | s' -> s, s' -> p where
-    {-| Inject an annotation over a signature. -}
-    injectA :: p -> s a -> s' a
-    {-| Project an annotation from a signature. -}
-    projectA :: s' a -> (s a, p)
-
-
-class RemA s s' | s -> s'  where
-    {-| Remove annotations from a signature. -}
-    remA :: s a -> s' a
-
-instance (RemA s s') => RemA (f :&: p :+: s) (f :+: s') where
-    remA (Inl (v :&: _)) = Inl v
-    remA (Inr v) = Inr $ remA v
-
-
-instance RemA (f :&: p) f where
-    remA (v :&: _) = v
-
-
-instance DistAnn f p (f :&: p) where
-
-    injectA c v = v :&: c
-
-    projectA (v :&: p) = (v,p)
-
-
-instance (DistAnn s p s') => DistAnn (f :+: s) p ((f :&: p) :+: s') where
-
-
-    injectA c (Inl v) = Inl (v :&: c)
-    injectA c (Inr v) = Inr $ injectA c v
-
-    projectA (Inl (v :&: p)) = (Inl v,p)
-    projectA (Inr v) = let (v',p) = projectA v
-                       in  (Inr v',p)
