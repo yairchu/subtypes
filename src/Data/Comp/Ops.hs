@@ -1,10 +1,7 @@
 {-# LANGUAGE ConstraintKinds        #-}
 {-# LANGUAGE DataKinds              #-}
-{-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GADTs                  #-}
-{-# LANGUAGE PolyKinds              #-}
 {-# LANGUAGE ScopedTypeVariables    #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
@@ -26,17 +23,10 @@
 module Data.Comp.Ops where
 
 import Data.Foldable
-import Data.Traversable
 import Data.Kind
 import Data.Proxy
 
-import Control.Applicative
-import Control.Monad hiding (mapM, sequence)
 import Data.Comp.SubsumeCommon
-
-
-import Prelude hiding (foldl, foldl1, foldr, foldr1, mapM, sequence)
-
 
 -- Sums
 
