@@ -24,7 +24,6 @@ module Data.Comp.SubsumeCommon
     , Emb (..)
     , Choose
     , Sum'
-    , Proxy (..)
     ) where
 
 -- | This type is used in its promoted form only. It represents
@@ -38,8 +37,6 @@ data Pos = Here | Le Pos | Ri Pos | Sum Pos Pos
 -- found. 'Ambiguous' indicates that there are duplicates on the left-
 -- or the right-hand side.
 data Emb = Found Pos | NotFound | Ambiguous
-
-data Proxy a = P
 
 
 type family Choose (e1 :: Emb) (r :: Emb) :: Emb where
