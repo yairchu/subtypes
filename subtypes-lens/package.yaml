@@ -1,0 +1,13 @@
+name: subtypes-lens
+version: 0.1.0
+synopsis: Generic prisms for subtypes
+category: Generics, Lens
+license: BSD3
+author: Yair Chuchem
+dependencies: 
+  - base >= 4.16 && < 4.20
+  - lens
+  - subtypes-core
+library:
+  source-dirs: src
+  ghc-options: -W
