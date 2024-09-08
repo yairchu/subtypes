@@ -1,6 +1,6 @@
 {-# LANGUAGE GHC2021, DataKinds, TypeFamilies, UndecidableInstances #-}
 
-module Data.Subtypes (Subsume(..), (:<), inj, proj) where
+module Data.Subtypes (Subsume(..), (:<:), inj, proj) where
 
 import Data.Proxy (Proxy(..))
 import GHC.Generics
@@ -44,11 +44,11 @@ instance (Generic a, Generic b, P.Subsume (Found p) (Rep a) (Rep b)) =>
     inj' _ = to . P.inj' (Proxy @(Found p)) . from
     prj' _ = fmap to . P.prj' (Proxy @(Found p)) . from
 
-infixl 5 :<
-type a :< b = Subsume (IsSubtype a b) a b
+infixl 5 :<:
+type a :<: b = Subsume (IsSubtype a b) a b
 
-inj :: forall a b. a :< b => a -> b
+inj :: forall a b. a :<: b => a -> b
 inj = inj' (Proxy @(IsSubtype a b))
 
-proj :: forall a b. a :< b => b -> Maybe a
+proj :: forall a b. a :<: b => b -> Maybe a
 proj = prj' (Proxy @(IsSubtype a b))
