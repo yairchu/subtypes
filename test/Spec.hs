@@ -1,6 +1,6 @@
 {-# LANGUAGE GHC2021 #-}
 
-import Data.Comp.Ops
+import Data.Subtypes.Parametric
 
 import GHC.Generics
 

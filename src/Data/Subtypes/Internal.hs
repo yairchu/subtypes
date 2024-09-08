@@ -1,20 +1,10 @@
 {-# LANGUAGE GHC2021, DataKinds, TypeFamilies, UndecidableInstances #-}
 
---------------------------------------------------------------------------------
--- |
--- Module      :  Data.Comp.SubsumeCommon
--- Copyright   :  (c) 2014 Patrick Bahr
--- License     :  BSD3
--- Maintainer  :  Patrick Bahr <paba@diku.dk>
--- Stability   :  experimental
--- Portability :  non-portable (GHC Extensions)
+-- | Internal type families for subsumption checking.
 --
--- Shared parts of the implementation of signature subsumption for
--- both the base and the multi library.
---
---------------------------------------------------------------------------------
+-- Based on Patrick Bahr's compdata:Data.Comp.SubsumeCommon module.
 
-module Data.Comp.SubsumeCommon
+module Data.Subtypes.Internal
     ( ComprEmb
     , Pos (..)
     , Emb (..)

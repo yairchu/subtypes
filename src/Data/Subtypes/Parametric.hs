@@ -1,24 +1,15 @@
 {-# LANGUAGE GHC2021, DataKinds, TypeFamilies, UndecidableInstances #-}
 
---------------------------------------------------------------------------------
--- |
--- Module      :  Data.Comp.Ops
--- Copyright   :  (c) 2010-2011 Patrick Bahr, Tom Hvitved
--- License     :  BSD3
--- Maintainer  :  Patrick Bahr <paba@diku.dk>
--- Stability   :  experimental
--- Portability :  non-portable (GHC Extensions)
+-- | Subsume class for parametric types.
 --
--- This module provides operators on functors.
---
---------------------------------------------------------------------------------
+-- Based on parts of Patrick Bahr's compdata:Data.Comp.Ops module.
 
-module Data.Comp.Ops where
+module Data.Subtypes.Parametric where
 
 import Data.Proxy
 import GHC.Generics
 
-import Data.Comp.SubsumeCommon
+import Data.Subtypes.Internal
 
 
 infixl 5 :<:

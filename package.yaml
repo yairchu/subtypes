@@ -1,5 +1,5 @@
-name: compdata
-version: 0.13.1
+name: subtypes
+version: 0.1.0
 synopsis: Compositional Data Types
 category: Generics
 license: BSD3
@@ -15,4 +15,4 @@ tests:
     main: Spec.hs
     source-dirs: test
     dependencies:
-    - compdata
+    - subtypes
