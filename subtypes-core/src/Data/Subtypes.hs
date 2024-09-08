@@ -8,13 +8,27 @@ import GHC.Generics
 import Data.Subtypes.Internal
 import qualified Data.Subtypes.Parametric as P
 
-type IsSubtype a b = CheckSubtype (P.Elem (Rec0 a) (Rep b)) (P.Elem (Rep a) (Rep b))
+type IsSubtype a b =
+    CheckSubtype
+    (P.Elem (Rec0 a) (Rep b))
+    (CheckStructureSubtype (IsBuiltin a) a b)
 
 type family CheckSubtype nom str where
     CheckSubtype (Found p) NotFound = Found (ByName p)
     CheckSubtype NotFound (Found p) = Found (ByStructure p)
     CheckSubtype NotFound NotFound = NotFound
     CheckSubtype _ _ = Ambiguous
+
+type family CheckStructureSubtype i a b where
+    CheckStructureSubtype True _ _ = NotFound
+    CheckStructureSubtype False a b = P.Elem (Rep a) (Rep b)
+
+type family IsBuiltin a where
+    IsBuiltin Int = True
+    IsBuiltin Float = True
+    IsBuiltin Double = True
+    IsBuiltin Char = True
+    IsBuiltin _ = False
 
 class Subsume (e :: Emb SubtypePos) a b where
     inj' :: Proxy e -> a -> b

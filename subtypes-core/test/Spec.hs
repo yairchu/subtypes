@@ -34,6 +34,11 @@ duck = Duck 2
 dog4 :: FourLeggedAnimal
 dog4 = Dog4 (MkDog "Snowy" 4)
 
+data Lang
+    = Lit Int
+    | Unit
+    deriving (Generic, Show)
+
 main :: IO ()
 main =
     do
@@ -43,3 +48,6 @@ main =
         print (inj dog :: Animal)
 
         print (inj (MkDog "Doggo" 3) :: FourLeggedAnimal)
+
+        print (inj (5 :: Int) :: Lang)
+        print (inj () :: Lang)
