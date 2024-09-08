@@ -1,10 +1,10 @@
-name: subtypes
+name: subtypes-core
 version: 0.1.0
-synopsis: Compositional Data Types
+synopsis: Lift subtypes into types
 category: Generics
 license: BSD3
 license-file: LICENSE
-author: Patrick Bahr, Tom Hvitved
+author: Patrick Bahr, Tom Hvitved, Yair Chuchem
 dependencies: 
   - base >= 4.16 && < 4.20
 library:
@@ -15,4 +15,4 @@ tests:
     main: Spec.hs
     source-dirs: test
     dependencies:
-    - subtypes
+    - subtypes-core
