@@ -5,12 +5,15 @@
 -- Based on Patrick Bahr's compdata:Data.Comp.SubsumeCommon module.
 
 module Data.Subtypes.Internal
-    ( ComprEmb
+    ( SubtypePos(..)
+    , ComprEmb
     , Pos (..)
     , Emb (..)
     , Choose
     , Sum', Seq'
     ) where
+
+data SubtypePos = ByName Pos | ByStructure Pos
 
 -- | This type is used in its promoted form only. It represents
 -- pointers from the left-hand side of a subsumption to the right-hand
@@ -24,7 +27,7 @@ data Pos = Here | Le Pos | Ri Pos | Sum Pos Pos | Wrapped Pos | Unwrapped Pos
 -- subsumption was found; 'NotFound' indicates no such subsumption was
 -- found. 'Ambiguous' indicates that there are duplicates on the left-
 -- or the right-hand side.
-data Emb = Found Pos | NotFound | Ambiguous
+data Emb p = Found p | NotFound | Ambiguous
 
 
 type family Choose e1 r where

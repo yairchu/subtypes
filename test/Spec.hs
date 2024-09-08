@@ -1,8 +1,8 @@
 {-# LANGUAGE GHC2021 #-}
 
-import Data.Subtypes.Parametric
+import Data.Subtypes
 
-import GHC.Generics
+import GHC.Generics (Generic)
 
 -- Examples taken from Csongor Kiss's
 -- generic-lens:Data.Generics.Sum.Subtype's documentation
@@ -34,21 +34,12 @@ duck = Duck 2
 dog4 :: FourLeggedAnimal
 dog4 = Dog4 (MkDog "Snowy" 4)
 
-injGen :: (Generic sup, Rec0 sub :<: Rep sup) => sub -> sup
-injGen = to . inj . K1 @_ @R
-
-injGenB :: (Generic sub, Generic sup, Rep sub :<: Rep sup) => sub -> sup
-injGenB = to . inj . from
-
-projGenB :: (Generic sub, Generic sup, Rep sub :<: Rep sup) => sup -> Maybe sub
-projGenB = fmap to . proj . from
-
 main :: IO ()
 main =
     do
-        print (injGenB dog4 :: Animal)
-        print (projGenB cat :: Maybe FourLeggedAnimal)
-        print (projGenB duck :: Maybe FourLeggedAnimal)
-        print (injGenB dog :: Animal)
+        print (inj dog4 :: Animal)
+        print (proj cat :: Maybe FourLeggedAnimal)
+        print (proj duck :: Maybe FourLeggedAnimal)
+        print (inj dog :: Animal)
 
-        print (injGen (MkDog "Doggo" 3) :: FourLeggedAnimal)
+        print (inj (MkDog "Doggo" 3) :: FourLeggedAnimal)

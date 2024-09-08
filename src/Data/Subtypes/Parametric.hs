@@ -6,7 +6,7 @@
 
 module Data.Subtypes.Parametric where
 
-import Data.Proxy
+import Data.Proxy (Proxy(..))
 import GHC.Generics
 
 import Data.Subtypes.Internal
@@ -22,7 +22,7 @@ type family Elem f g where
     Elem f (g1 :+: g2) = Choose (Elem f g1) (Elem f g2)
     Elem f g = NotFound
 
-class Subsume (e :: Emb) f g where
+class Subsume (e :: Emb Pos) f g where
     inj' :: Proxy e -> f a -> g a
     prj' :: Proxy e -> g a -> Maybe (f a)
 
